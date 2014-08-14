@@ -1,17 +1,30 @@
 #!/bin/sh
 
-TENANT=1
-URL="http://example.com/mutex/$TENANT"
+usage() { echo "Usage: $0 -u <url> -p <program to start>" 1>&2; exit 1; }
 
-if [ $# -eq 0 ]; then
-    echo "Usage: $0 <program to start>"
-    exit
+while getopts ":u:p:" opt; do
+  case "${opt}" in
+    u)
+      url=$OPTARG
+      ;;
+    p)
+      program=$OPTARG
+      ;;
+    *)
+      usage
+      ;;
+  esac
+done
+shift $((OPTIND-1))
+
+if [ -z "${url}" ] || [ -z "${program}" ]; then
+    usage
 fi
 
-if [ $(curl --write-out %{http_code} --silent --output /dev/null "$URL/set?user=$USER") = 200 ]; then
+if [ $(curl --write-out %{http_code} --silent --output /dev/null "${url}/set?user=$USER") = 200 ]; then
   echo "mutex has been set"
-  $@
-  curl "$URL/release?user=$USER"
+  ${program}
+  curl "${url}/release?user=$USER"
 else
-  curl "$URL/"
+  curl "${url}/"
 fi
