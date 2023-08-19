@@ -2,8 +2,8 @@ require 'yaml'
 
 class UserMutex
   def initialize(tenant_id)
-    @file = File.join(Sinatra::Application.settings.root, 'tmp', "mutex_#{tenant_id.to_i}.txt")
-    @data = File.exist?(@file) ? YAML.load_file(@file) : {}
+    @file = File.join(Sinatra::Application.settings.root, 'tmp', "mutex_#{tenant_id.to_i}.yaml")
+    @data = File.exist?(@file) ? YAML.load_file(@file, permitted_classes: [Symbol, Time]) : {}
   end
 
   def set?
